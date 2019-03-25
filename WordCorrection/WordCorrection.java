@@ -138,22 +138,22 @@ class Dictionary {
             int similarity = 0;
             for(int i = 0;i<26;i++){
                 similarity += ((int[])dict_vector.get(index))[i]* wrong_word_vector[i];
-                if(similarity>rank_value[0]){
-                    rank_pos[2] = rank_pos[1];
-                    rank_value[2] = rank_value[1];
-                    rank_pos[1] = rank_pos[0];
-                    rank_value[1] = rank_value[0];
-                    rank_pos[0] = index;
-                    rank_value[0] = similarity;
-                }else if(similarity>rank_value[1]){
-                    rank_pos[2] = rank_pos[1];
-                    rank_value[2] = rank_value[1];
-                    rank_pos[1] = index;
-                    rank_value[1] = similarity;
-                }else if(similarity>rank_value[2]){
-                    rank_pos[2] = index;
-                    rank_value[2] = similarity;
-                }
+            }
+            if(similarity>rank_value[0]){
+                rank_pos[2] = rank_pos[1];
+                rank_value[2] = rank_value[1];
+                rank_pos[1] = rank_pos[0];
+                rank_value[1] = rank_value[0];
+                rank_pos[0] = index;
+                rank_value[0] = similarity;
+            }else if(similarity>rank_value[1]){
+                rank_pos[2] = rank_pos[1];
+                rank_value[2] = rank_value[1];
+                rank_pos[1] = index;
+                rank_value[1] = similarity;
+            }else if(similarity>rank_value[2]){
+                rank_pos[2] = index;
+                rank_value[2] = similarity;
             }
         }
         for(int i = 0;i<3;i++){
