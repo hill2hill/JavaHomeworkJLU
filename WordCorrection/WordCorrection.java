@@ -2,12 +2,15 @@ import java.io.*;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.lang.Object;
 
 import javax.sound.sampled.AudioFormat.Encoding;
 
-import com.sun.xml.internal.bind.v2.runtime.output.Encoded;
+//import com.sun.xml.internal.bind.v2.runtime.output.Encoded;
 
 import java.util.*;
+
+import static java.lang.Math.abs;
 
 public class WordCorrection {
     public static void main(String[] args) {
@@ -15,7 +18,7 @@ public class WordCorrection {
         TestTxt testtxt = new TestTxt();
         //String[] recommend_words;
         //WordCorrection/englishDictionary.txt
-        String dict_path = "WordCorrection/englishDictionary.txt", test_path = "WordCorrection/test.txt";
+        String dict_path = "src/englishDictionary.txt", test_path = "src/test.txt";
 
         dict.dict_array = dict.load_dict(dict_path);
         testtxt.testtxt_arraylist = testtxt.load_txt(test_path);
@@ -31,14 +34,14 @@ public class WordCorrection {
                 testtxt.testtxt_arraylist.set(i, choosen);
             }
         }
-        dict.write_dictionary("WordCorrection/TempDictionary.txt");
-        testtxt.write_corrected_txt("WordCorrection/Temptest.txt");
+        dict.write_dictionary("src/TempDictionary.txt");
+        testtxt.write_corrected_txt("src/Temptest.txt");
         System.out.println("Bye~");
     }
 }
 
 class Dictionary {
-    ArrayList dict_array = new ArrayList<String>();
+    ArrayList<String> dict_array = new ArrayList<String>();
     ArrayList dict_vector = new ArrayList<int[]>();
 
     ArrayList load_dict(String dic_path) {
@@ -64,33 +67,47 @@ class Dictionary {
     String append(String word, String scanned_commend) {
         /* 将新单词附加入已有的字典动态数组中 */
         switch (scanned_commend) {
-        case "1":
-            word = this.recommend(word)[0];
-            break;
-        case "2":
-            word = this.recommend(word)[1];
-            break;
-        case "3":
-            word = this.recommend(word)[2];
-            break;
-        case "a":
-        case "add":
-            dict_array.add(word);
-            dict_vector.add(get_vector(word));
-            break;
-        case "t":
-        case "tape":
-            System.out.println("Tape your word");
-            Scanner scan = new Scanner(System.in);
-            word = scan.nextLine();
-            dict_array.add((String)word);
-            dict_vector.add(get_vector(word));
-            break;
-        default:
-            /*
-             * system.out.println("bad commend!"); word = this.append(word,
-             * scanned_commend);
-             */
+            case "1":
+                word = this.recommend(word)[0];
+                break;
+            case "2":
+                word = this.recommend(word)[1];
+                break;
+            case "3":
+                word = this.recommend(word)[2];
+                break;
+            case "4":
+                word = this.recommend(word)[3];
+                break;
+            case "5":
+                word = this.recommend(word)[4];
+                break;
+            case "6":
+                word = this.recommend(word)[5];
+                break;
+            case "7":
+                word = this.recommend(word)[6];
+                break;
+            case "8":
+                word = this.recommend(word)[7];
+                break;
+            case "a":
+            case "add":
+                dict_array.add(word);
+                dict_vector.add(get_vector(word));
+                break;
+            case "t":
+            case "tape":
+                System.out.println("Tape your word");
+                Scanner scan = new Scanner(System.in);
+                word = scan.nextLine();
+                dict_array.add((String)word);
+                dict_vector.add(get_vector(word));
+                break;
+            default:
+                System.out.println("bad commend!");
+                //word = this.append(word,scanned_commend);
+
         }
         String choosen = word;
         return choosen;
@@ -120,45 +137,92 @@ class Dictionary {
 
     void recommend_tips(String word) {
         System.out.println(word + "：此词不在词典里，请输入指令进行操作");
-        String[] recommend_words = new String[3];
+        String[] recommend_words = new String[8];
         recommend_words = this.recommend(word);
-        System.out.println("1.使用 \"" + recommend_words[0] + "\" 进行替换");
+        for(int i=0;i<8;i++){
+            System.out.println(i +".使用 \"" + recommend_words[i] + "\" 进行替换");
+        }
+        /*System.out.println("1.使用 \"" + recommend_words[0] + "\" 进行替换");
         System.out.println("2.使用 \"" + recommend_words[1] + "\" 进行替换");
-        System.out.println("3.使用 \"" + recommend_words[2] + "\" 进行替换");
-        System.out.println("输入 a/add 将改词加入字典");
+        System.out.println("3.使用 \"" + recommend_words[2] + "\" 进行替换");*/
+        System.out.println("输入 a/add 将该词加入字典");
         System.out.println("输入 t/tape 进行自定义替换");
     }
 
-    String[] recommend(String word) {
+    /*String[] recommend(String word) {
         String[] recommend_words = new String[3];
         int[] rank_pos = {0,0,0};
-        int[] rank_value = {0,0,0};
+        int[] rank_value = {1000,1000,1000};
         int[] wrong_word_vector = get_vector(word);
         for(int index=0;index<dict_vector.size();index++){
-            int similarity = 0;
+            int similarity = 100;
+            int re_lenth = 0;
+            int word_lenth =0;
             for(int i = 0;i<26;i++){
-                similarity += ((int[])dict_vector.get(index))[i]* wrong_word_vector[i];
-            }
-            if(similarity>rank_value[0]){
-                    rank_pos[2] = rank_pos[1];
-                    rank_value[2] = rank_value[1];
-                    rank_pos[1] = rank_pos[0];
-                    rank_value[1] = rank_value[0];
-                    rank_pos[0] = index;
-                    rank_value[0] = similarity;
-                }else if(similarity>rank_value[1]){
-                    rank_pos[2] = rank_pos[1];
-                    rank_value[2] = rank_value[1];
-                    rank_pos[1] = index;
-                    rank_value[1] = similarity;
-                }else if(similarity>rank_value[2]){
-                    rank_pos[2] = index;
-                    rank_value[2] = similarity;
+                similarity += abs(((int[])dict_vector.get(index))[i]*5- wrong_word_vector[i]);
+                if(((int[])dict_vector.get(index))[i] > 0){
+                    re_lenth++;
                 }
+                if(wrong_word_vector[i]>0){
+                    word_lenth++;
+                }
+            }
+            similarity *= abs(re_lenth-word_lenth)+1;
+            if(dict_array.get(index).toCharArray()[0] != word.toCharArray()[0]){
+                similarity = 10000;
+            }
+
+            if(similarity<rank_value[0]){
+                rank_pos[2] = rank_pos[1];
+                rank_value[2] = rank_value[1];
+                rank_pos[1] = rank_pos[0];
+                rank_value[1] = rank_value[0];
+                rank_pos[0] = index;
+                rank_value[0] = similarity;
+            }else if(similarity<rank_value[1]){
+                rank_pos[2] = rank_pos[1];
+                rank_value[2] = rank_value[1];
+                rank_pos[1] = index;
+                rank_value[1] = similarity;
+            }else if(similarity<rank_value[2]){
+                rank_pos[2] = index;
+                rank_value[2] = similarity;
+            }
         }
         for(int i = 0;i<3;i++){
             recommend_words[i] = (String) dict_array.get(rank_pos[i]);
         }
+        return recommend_words;
+    }*/
+    String[] recommend(String word){
+        String[] recommend_words = new String[8];
+        int[] recommend_index = {0,0,0,0,0,0,0,0};
+        double[] recommend_dist = {100,100,100,100,100,100,100,100};
+        for(int index=0;index<dict_vector.size();index++){
+            double d = new LevenshteinDistance().distance(word, dict_array.get(index));
+            if(dict_array.get(index).toCharArray()[0] != word.toCharArray()[0]){
+                d = 10000;
+            }
+            if(d<recommend_dist[7]){
+                recommend_dist[7] = d;
+                recommend_index[7] = index;
+            }
+            int j = 6;
+            while((j>=0)&&(recommend_dist[j]>recommend_dist[j+1])){
+                double t_dist=recommend_dist[j+1];
+                int t_index = recommend_index[j+1];
+                recommend_dist[j+1] = recommend_dist[j];
+                recommend_index[j+1] = recommend_index[j];
+                recommend_dist[j] = t_dist;
+                recommend_index[j] = t_index;
+                j--;
+            }
+        }
+
+        for(int i = 0;i<8;i++){
+            recommend_words[i] = dict_array.get(recommend_index[i]);
+        }
+
         return recommend_words;
     }
 
@@ -168,9 +232,9 @@ class Dictionary {
         char[] splited = word.toCharArray();
         for (int i = 0; i < splited.length; i++) {
             if (Integer.valueOf(splited[i]) > 96 && Integer.valueOf(splited[i]) < 123) {
-                vector[(Integer.valueOf(splited[i]) - 97)]++;
+                vector[(Integer.valueOf(splited[i]) - 97)] = 1;
             } else if (Integer.valueOf(splited[i]) < 91 && Integer.valueOf(splited[i]) > 64) {
-                vector[(Integer.valueOf(splited[i]) - 65)]++;
+                vector[(Integer.valueOf(splited[i]) - 65)] = 1;
             }
         }
         return vector;
@@ -219,4 +283,33 @@ class TestTxt {
             e.printStackTrace();
         }
     }
+}
+
+class LevenshteinDistance {
+
+    public double distance(String w1,String w2){
+        double[][] m = new double[w1.length()+1][w2.length()+1];
+        for(int i=0;i<m.length;i++){
+            m[i][0]=i;
+        }
+        for(int i=0;i<m[0].length;i++){
+            m[0][i]=i;
+        }
+        for(int i=1;i<m.length;i++){
+            for(int j=1;j<m[0].length;j++){
+                m[i][j] = min(m[i][j-1]+1,m[i-1][j]+1,m[i-1][j-1]+cost(w1.charAt(i-1),w2.charAt(j-1)));
+            }
+        }
+        return m[w1.length()][w2.length()];
+    }
+
+    protected double cost(char c1,char c2) {
+        return c1==c2?0:1;
+    }
+
+    protected double min(double i, double j, double k) {
+        double t = i<j?i:j;
+        return t<k?t:k;
+    }
+
 }
